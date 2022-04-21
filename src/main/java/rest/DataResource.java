@@ -20,7 +20,14 @@ public class DataResource {
     @GET
     @Path("quote")
     @Produces({MediaType.APPLICATION_JSON})
-    public String getCount() throws IOException {
+    public String getQuote() throws IOException {
         return FACADE.getRandomQuote();
+    }
+
+    @GET
+    @Path("joke")
+    @Produces({MediaType.APPLICATION_JSON})
+    public String getJoke() throws IOException {
+        return FACADE.getRandomJoke();
     }
 }
