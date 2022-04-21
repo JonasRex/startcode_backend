@@ -3,7 +3,6 @@ package facades;
 import entities.Profile;
 import entities.RenameMe;
 import errorhandling.EntityNotFoundException;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.TypedQuery;
@@ -25,7 +24,6 @@ public class ProfileFacade implements IFacade<Profile>{
         if (instance == null) {
             emf = _emf;
             instance = new ProfileFacade();
-
         }
         return instance;
     }
@@ -69,11 +67,13 @@ public class ProfileFacade implements IFacade<Profile>{
         p.setFirstName(profile.getFirstName());
         p.setLastName(profile.getLastName());
         p.setEmail(profile.getEmail());
+        p.setRenameMesList(profile.getRenameMesList());
+
 
         em.getTransaction().begin();
-        Profile updated = em.merge(profile);
+        Profile updated = em.merge(p);
         em.getTransaction().commit();
-        return updated;
+        return profile;
     }
 
     @Override
@@ -129,6 +129,17 @@ public class ProfileFacade implements IFacade<Profile>{
             em.getTransaction().commit();
             return updated;
         } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public long getCount() {
+        EntityManager em = getEntityManager();
+        try{
+            long renameMeCount = (long)em.createQuery("SELECT COUNT(p) FROM Profile p").getSingleResult();
+            return renameMeCount;
+        }finally{
             em.close();
         }
     }

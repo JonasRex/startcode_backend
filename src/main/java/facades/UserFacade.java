@@ -7,9 +7,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import security.errorhandling.AuthenticationException;
 
-/**
- * @author lam@cphbusiness.dk
- */
 public class UserFacade {
 
     private static EntityManagerFactory emf;
@@ -17,7 +14,6 @@ public class UserFacade {
 
     private UserFacade() {
     }
-
 
     public static UserFacade getUserFacade(EntityManagerFactory _emf) {
         if (instance == null) {
@@ -27,11 +23,9 @@ public class UserFacade {
         return instance;
     }
 
-
     private EntityManager getEntityManager() {
         return emf.createEntityManager();
     }
-
 
 
     public User getVeryfiedUser(String username, String password) throws AuthenticationException {

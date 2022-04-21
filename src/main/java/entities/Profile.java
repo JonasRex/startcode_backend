@@ -40,7 +40,7 @@ public class Profile implements Serializable {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
-        renameMesList = new ArrayList<>();
+        this.renameMesList = new ArrayList<>();
     }
 
     public Profile() {
@@ -96,7 +96,10 @@ public class Profile implements Serializable {
         if(!renameMe.getProfileList().contains(this)){
             renameMe.addProfile(this);
         }
+    }
 
+    public void setRenameMesList(List<RenameMe> renameMesList) {
+        this.renameMesList = renameMesList;
     }
 
     public void removeRenameMe(RenameMe renameMe) {

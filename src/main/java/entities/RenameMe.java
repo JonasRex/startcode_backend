@@ -25,14 +25,14 @@ public class RenameMe implements Serializable {
 
     @ManyToMany(mappedBy="renameMesList")
     private List<Profile> profileList;
-    
+
     public RenameMe() {
-    }  
+    }
 
     public RenameMe(String dummyStr1, String dummyStr2) {
         this.dummyStr1 = dummyStr1;
         this.dummyStr2 = dummyStr2;
-        profileList = new ArrayList<>();
+        this.profileList = new ArrayList<>();
     }
 
     public int getId() {
@@ -42,7 +42,7 @@ public class RenameMe implements Serializable {
     public void setId(int id) {
         this.id = id;
     }
-    
+
     public String getDummyStr1() {
         return dummyStr1;
     }

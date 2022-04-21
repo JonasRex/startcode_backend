@@ -2,21 +2,12 @@ package rest;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import dtos.RenameMeDTO;
+import dtos.ProfileDTO;
+import entities.Profile;
 import entities.RenameMe;
-import io.restassured.http.ContentType;
-import utils.EMF_Creator;
 import io.restassured.RestAssured;
-import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
+import io.restassured.http.ContentType;
 import io.restassured.parsing.Parser;
-import java.net.URI;
-import java.util.List;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.ws.rs.core.UriBuilder;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.http.util.HttpStatus;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
@@ -24,16 +15,25 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-//Uncomment the line below, to temporarily disable this test
-//@Disabled
+import utils.EMF_Creator;
 
-public class RenameMeResourceTest {
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.ws.rs.core.UriBuilder;
+import java.net.URI;
+import java.util.List;
 
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.CoreMatchers.hasItems;
+import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+class ProfileResourceTest {
     private static final int SERVER_PORT = 7777;
     private static final String SERVER_URL = "http://localhost/api";
-    private static RenameMe r1, r2, r3;
+    private static Profile p1, p2, p3;
+    private static RenameMe r1;
 
     static final URI BASE_URI = UriBuilder.fromUri(SERVER_URL).port(SERVER_PORT).build();
     private static HttpServer httpServer;
@@ -57,6 +57,7 @@ public class RenameMeResourceTest {
         RestAssured.baseURI = SERVER_URL;
         RestAssured.port = SERVER_PORT;
         RestAssured.defaultParser = Parser.JSON;
+
     }
 
     @AfterAll
@@ -73,13 +74,17 @@ public class RenameMeResourceTest {
     @BeforeEach
     public void setUp() {
         EntityManager em = emf.createEntityManager();
+        p1 = new Profile("Anna", "Andersen", "aa@mail.com");
+        p2 = new Profile("Bo", "Berthelsen", "bb@mail.com");
         r1 = new RenameMe("First", "First");
-        r2 = new RenameMe("Second", "Second");
+        p2.addRenameMe(r1);
         try {
             em.getTransaction().begin();
+            em.createNamedQuery("Profile.deleteAllRows").executeUpdate();
             em.createNamedQuery("RenameMe.deleteAllRows").executeUpdate();
+            em.persist(p1);
+            em.persist(p2);
             em.persist(r1);
-            em.persist(r2);
             em.getTransaction().commit();
         } finally {
             em.close();
@@ -88,50 +93,37 @@ public class RenameMeResourceTest {
 
     @Test
     public void testServerIsUp() {
-        given().when().get("/xxx").then().statusCode(200);
-    }
-
-
-    @Test
-    public void testCount() throws Exception {
-        given()
-                .contentType("application/json")
-                .get("/xxx/count").then()
-                .assertThat()
-                .statusCode(HttpStatus.OK_200.getStatusCode())
-                .body("count", equalTo(2));
+        given().when().get("/profile").then().statusCode(200);
     }
 
     @Test
-    public void testGetAll() {
-        List<RenameMeDTO> rmeDTOs;
+    void getAll() {
+        List<ProfileDTO> profileDTOS;
 
-        rmeDTOs = given()
+        profileDTOS = given()
                 .contentType("application/json")
                 .when()
-                .get("/xxx")
+                .get("/profile")
                 .then()
                 .statusCode(HttpStatus.OK_200.getStatusCode())
-                .extract().body().jsonPath().getList("", RenameMeDTO.class);
+                .extract().body().jsonPath().getList("", ProfileDTO.class);
 
 
-        assertEquals(rmeDTOs.size(), 2);
+        assertEquals(profileDTOS.size(), 2);
     }
 
-
     @Test
-    public void testGetById() {
+    void getById() {
         given()
                 .contentType("application/json")
-                .get("/xxx/{id}", r1.getId())
+                .get("/profile/{id}", p1.getId())
                 .then()
                 .assertThat()
                 .statusCode(HttpStatus.OK_200.getStatusCode())
-                .body("str1", equalTo("First"))
-                .body("str2", equalTo("First"));
+                .body("firstName", equalTo("Anna"))
+                .body("lastName", equalTo("Andersen"))
+                .body("email", equalTo("aa@mail.com"));
     }
-
-
 
     @Test
     public void testFailByID() {
@@ -141,61 +133,97 @@ public class RenameMeResourceTest {
 
         given()
                 .contentType("application/json")
-                .get("/xxx/99999")
+                .get("/profile/99999")
                 .then()
                 .assertThat()
                 .statusCode(HttpStatus.NOT_FOUND_404.getStatusCode())
-                .body("message", equalTo("The RenameMe entity with ID: 99999 Was not found"));
+                .body("message", equalTo("The Profile entity with ID: 99999 Was not found"));
     }
 
 
     @Test
-    public void testCreate() {
-        r3 = new RenameMe("Third", "Third");
-        String requestBody = GSON.toJson(new RenameMeDTO(r3));
+    void create() {
+        p3 = new Profile("Charlie", "Cameron", "cc@mail.com");
+        String requestBody = GSON.toJson(new ProfileDTO(p3));
 
         given()
                 .header("Content-type", ContentType.JSON)
                 .and()
                 .body(requestBody)
                 .when()
-                .post("/xxx")
+                .post("/profile")
                 .then()
                 .assertThat()
                 .statusCode(HttpStatus.OK_200.getStatusCode())
-                .body("str1", equalTo("Third"));
+                .body("firstName", equalTo("Charlie"))
+                .body("lastName", equalTo("Cameron"))
+                .body("email", equalTo("cc@mail.com"));
     }
 
     @Test
-    public void updateTest() {
-        RenameMeDTO rmeDTO = new RenameMeDTO(r1);
-        rmeDTO.setDummyStr1("Last");
-        String requestBody = GSON.toJson(rmeDTO);
+    void update() {
+        ProfileDTO profileDTO = new ProfileDTO(p1);
+        profileDTO.setFirstName("Lone");
+        String requestBody = GSON.toJson(profileDTO);
 
         given()
                 .header("Content-type", ContentType.JSON)
                 .body(requestBody)
                 .when()
-                .put("/xxx/"+r1.getId())
+                .put("/profile/"+p1.getId())
                 .then()
                 .assertThat()
                 .statusCode(200)
-                .body("id", equalTo(r1.getId()))
-                .body("str1", equalTo("Last"));
+                .body("id", equalTo(p1.getId()))
+                .body("firstName", equalTo("Lone"));
     }
 
     @Test
-    public void testDelete() {
+    void delete() {
         given()
                 .header("Content-type", ContentType.JSON)
-                .pathParam("id", r1.getId())
-                .delete("/xxx/{id}")
+                .pathParam("id", p1.getId())
+                .delete("/profile/{id}")
                 .then()
                 .assertThat()
                 .statusCode(HttpStatus.OK_200.getStatusCode())
-                .body("id", equalTo(r1.getId()));
+                .body("id", equalTo(p1.getId()));
     }
 
+    @Test
+    void addRelation() {
+        given()
+                .header("Content-type", ContentType.JSON)
+                .pathParam("id", p1.getId())
+                .put("/profile/addrenameme/{id}/1")
+                .then()
+                .assertThat()
+                .statusCode(HttpStatus.OK_200.getStatusCode())
+                .body("id", equalTo(p1.getId()))
+                .body("renameMeDTOS", hasItems(hasEntry("id",1)));
 
+    }
 
+    @Test
+    void removeRelation() {
+        given()
+                .header("Content-type", ContentType.JSON)
+                .pathParam("id", p2.getId()).pathParam("item_id", r1.getId())
+                .delete("/profile/removerenameme/{id}/{item_id}")
+                .then()
+                .assertThat()
+                .statusCode(HttpStatus.OK_200.getStatusCode())
+                .body("id", equalTo(p2.getId()))
+                .body("renameMeDTOS", empty());
+    }
+
+    @Test
+    public void getCount() throws Exception {
+        given()
+                .contentType("application/json")
+                .get("/profile/count").then()
+                .assertThat()
+                .statusCode(HttpStatus.OK_200.getStatusCode())
+                .body("count", equalTo(2));
+    }
 }

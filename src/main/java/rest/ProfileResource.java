@@ -74,4 +74,12 @@ public class ProfileResource {
         ProfileDTO updated = FACADE.removeRelation(id1, id2);
         return Response.ok().entity(GSON.toJson(updated)).build();
     }
+
+    @GET
+    @Path("count")
+    @Produces({MediaType.APPLICATION_JSON})
+    public String getCount()  {
+        long count = FACADE.getCount();
+        return "{\"count\":"+count+"}";  //Done manually so no need for a DTO
+    }
 }

@@ -1,9 +1,7 @@
 package facades;
 
-import entities.Profile;
 import entities.RenameMe;
 import errorhandling.EntityNotFoundException;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.TypedQuery;
@@ -27,7 +25,6 @@ public class RenameMeFacade implements IFacade<RenameMe>{
         }
         return instance;
     }
-
 
     @Override
     public RenameMe create(RenameMe renameMe) {
@@ -94,5 +91,16 @@ public class RenameMeFacade implements IFacade<RenameMe>{
     @Override
     public RenameMe removeRelation(int id1, int id2) throws EntityNotFoundException {
         return null;
+    }
+
+    @Override
+    public long getCount() {
+        EntityManager em = getEntityManager();
+        try{
+            long renameMeCount = (long)em.createQuery("SELECT COUNT(r) FROM RenameMe r").getSingleResult();
+            return renameMeCount;
+        }finally{
+            em.close();
+        }
     }
 }

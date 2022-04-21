@@ -26,8 +26,8 @@ public class User implements Serializable {
   private String userPass;
 
   @JoinTable(name = "user_roles", joinColumns = {
-    @JoinColumn(name = "user_name", referencedColumnName = "user_name")}, inverseJoinColumns = {
-    @JoinColumn(name = "role_name", referencedColumnName = "role_name")})
+          @JoinColumn(name = "user_name", referencedColumnName = "user_name")}, inverseJoinColumns = {
+          @JoinColumn(name = "role_name", referencedColumnName = "role_name")})
   @ManyToMany
   private List<Role> roleList = new ArrayList<>();
 
@@ -54,15 +54,15 @@ public class User implements Serializable {
     }
     List<String> rolesAsStrings = new ArrayList<>();
     roleList.forEach((role) -> {
-        rolesAsStrings.add(role.getRoleName());
-      });
+      rolesAsStrings.add(role.getRoleName());
+    });
     return rolesAsStrings;
   }
 
-   public boolean verifyPassword(String pw) {
+  public boolean verifyPassword(String pw) {
 
-        return(BCrypt.checkpw(pw, userPass));
-    }
+    return(BCrypt.checkpw(pw, userPass));
+  }
 
 
   public String getUserName() {
