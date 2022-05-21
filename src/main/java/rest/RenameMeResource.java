@@ -46,16 +46,16 @@ public class RenameMeResource {
     @Path("/{id}")
     @Produces({MediaType.APPLICATION_JSON})
     public Response getById(@PathParam("id") int id) throws EntityNotFoundException {
-        RenameMeDTO rdto = FACADE.getById(id);
-        return Response.ok().entity(GSON.toJson(rdto)).build();
+        RenameMeDTO dto = FACADE.getById(id);
+        return Response.ok().entity(GSON.toJson(dto)).build();
     }
     @POST
     @Produces({MediaType.APPLICATION_JSON})
     @Consumes({MediaType.APPLICATION_JSON})
     public Response create(String content) {
-        RenameMeDTO rdto = GSON.fromJson(content, RenameMeDTO.class);
-        RenameMeDTO newRdto = FACADE.create(rdto);
-        return Response.ok().entity(GSON.toJson(newRdto)).build();
+        RenameMeDTO dto = GSON.fromJson(content, RenameMeDTO.class);
+        RenameMeDTO newDto = FACADE.create(dto);
+        return Response.ok().entity(GSON.toJson(newDto)).build();
     }
 
     @PUT
@@ -63,9 +63,9 @@ public class RenameMeResource {
     @Produces({MediaType.APPLICATION_JSON})
     @Consumes({MediaType.APPLICATION_JSON})
     public Response update(@PathParam("id") int id, String content) throws EntityNotFoundException {
-        RenameMeDTO rdto = GSON.fromJson(content, RenameMeDTO.class);
-        rdto.setId(id);
-        RenameMeDTO updated = FACADE.update(rdto);
+        RenameMeDTO dto = GSON.fromJson(content, RenameMeDTO.class);
+        dto.setId(id);
+        RenameMeDTO updated = FACADE.update(dto);
         return Response.ok().entity(GSON.toJson(updated)).build();
     }
 

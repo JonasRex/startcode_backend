@@ -44,7 +44,7 @@ public class RenameMeFacade implements IFacade<RenameMe>{
         EntityManager em = getEntityManager();
         RenameMe renameMe = em.find(RenameMe.class, id);
         if (renameMe == null)
-            throw new EntityNotFoundException("The RenameMe entity with ID: "+id+" Was not found");
+            throw new EntityNotFoundException("The entity with ID: " + id + " was not found");
         return renameMe;
     }
 
@@ -60,7 +60,7 @@ public class RenameMeFacade implements IFacade<RenameMe>{
         EntityManager em = getEntityManager();
         RenameMe r = em.find(RenameMe.class,renameMe.getId());
         if(r == null){
-            throw new EntityNotFoundException("RENAMEME with ID: " + renameMe.getId() + " not found");
+            throw new EntityNotFoundException("The entity with ID: " + renameMe.getId() + " was not found");
         }
         r.setDummyStr1(renameMe.getDummyStr1());
         r.setDummyStr2(renameMe.getDummyStr2());

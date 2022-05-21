@@ -60,17 +60,17 @@ public class ProfileResource {
     }
 
     @PUT
-    @Path("/addrenameme/{profileid}/{renamemeid}")
+    @Path("/add/{profileid}/{entityid}")
     @Produces({MediaType.APPLICATION_JSON})
-    public Response addRelation(@PathParam("profileid") int id1, @PathParam("renamemeid") int id2) throws EntityNotFoundException {
+    public Response addRelation(@PathParam("profileid") int id1, @PathParam("entityid") int id2) throws EntityNotFoundException {
         ProfileDTO updated = FACADE.addRelation(id1, id2);
         return Response.ok().entity(GSON.toJson(updated)).build();
     }
 
     @DELETE
-    @Path("/removerenameme/{profileid}/{renamemeid}")
+    @Path("/remove/{profileid}/{entityid}")
     @Produces({MediaType.APPLICATION_JSON})
-    public Response removeRelation(@PathParam("profileid") int id1, @PathParam("renamemeid") int id2) throws EntityNotFoundException {
+    public Response removeRelation(@PathParam("profileid") int id1, @PathParam("entityid") int id2) throws EntityNotFoundException {
         ProfileDTO updated = FACADE.removeRelation(id1, id2);
         return Response.ok().entity(GSON.toJson(updated)).build();
     }

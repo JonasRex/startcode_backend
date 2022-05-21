@@ -145,7 +145,7 @@ public class RenameMeResourceTest {
                 .then()
                 .assertThat()
                 .statusCode(HttpStatus.NOT_FOUND_404.getStatusCode())
-                .body("message", equalTo("The RenameMe entity with ID: 99999 Was not found"));
+                .body("message", equalTo("The entity with ID: 99999 was not found"));
     }
 
 

@@ -194,13 +194,13 @@ class ProfileResourceTest {
     void addRelation() {
         given()
                 .header("Content-type", ContentType.JSON)
-                .pathParam("id", p1.getId())
-                .put("/profile/addrenameme/{id}/1")
+                .pathParam("id", p1.getId()).pathParam("entityid", r1.getId())
+                .put("/profile/add/{id}/{entityid}")
                 .then()
                 .assertThat()
                 .statusCode(HttpStatus.OK_200.getStatusCode())
                 .body("id", equalTo(p1.getId()))
-                .body("renameMeDTOS", hasItems(hasEntry("id",1)));
+                .body("renameMeDTOS", hasItems(hasEntry("id",r1.getId())));
 
     }
 
@@ -208,8 +208,8 @@ class ProfileResourceTest {
     void removeRelation() {
         given()
                 .header("Content-type", ContentType.JSON)
-                .pathParam("id", p2.getId()).pathParam("item_id", r1.getId())
-                .delete("/profile/removerenameme/{id}/{item_id}")
+                .pathParam("id", p2.getId()).pathParam("entityid", r1.getId())
+                .delete("/profile/remove/{id}/{entityid}")
                 .then()
                 .assertThat()
                 .statusCode(HttpStatus.OK_200.getStatusCode())
