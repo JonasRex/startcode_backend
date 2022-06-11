@@ -1,7 +1,5 @@
 package facades;
 
-import com.nimbusds.jose.shaded.json.JSONObject;
-import entities.Profile;
 import utils.Utility;
 
 import javax.persistence.EntityManager;

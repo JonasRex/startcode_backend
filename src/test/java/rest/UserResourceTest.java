@@ -2,8 +2,9 @@ package rest;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import dtos.ProfileDTO;
-import entities.Profile;
+import dtos.UserDTO;
+import entities.Role;
+import entities.User;
 import entities.RenameMe;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -29,10 +30,11 @@ import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-class ProfileResourceTest {
+class UserResourceTest {
     private static final int SERVER_PORT = 7777;
     private static final String SERVER_URL = "http://localhost/api";
-    private static Profile p1, p2, p3;
+    private static User u1, u2, u3;
+    private static Role userRole;
     private static RenameMe r1;
 
     static final URI BASE_URI = UriBuilder.fromUri(SERVER_URL).port(SERVER_PORT).build();
@@ -74,16 +76,27 @@ class ProfileResourceTest {
     @BeforeEach
     public void setUp() {
         EntityManager em = emf.createEntityManager();
-        p1 = new Profile("Anna", "Andersen", "aa@mail.com");
-        p2 = new Profile("Bo", "Berthelsen", "bb@mail.com");
-        r1 = new RenameMe("First", "First");
-        p2.addRenameMe(r1);
         try {
-            em.getTransaction().begin();
-            em.createNamedQuery("Profile.deleteAllRows").executeUpdate();
-            em.createNamedQuery("RenameMe.deleteAllRows").executeUpdate();
-            em.persist(p1);
-            em.persist(p2);
+        em.getTransaction().begin();
+        em.createNamedQuery("User.deleteAllRows").executeUpdate();
+        em.createNamedQuery("RenameMe.deleteAllRows").executeUpdate();
+        em.createNamedQuery("Role.deleteAllRows").executeUpdate();
+
+        u1 = new User("AnnaAnna", "test","Anna", "Andersen", "aa@mail.com");
+        u2 = new User("BomberBo", "test","Bo", "Berthelsen", "bb@mail.com");
+        r1 = new RenameMe("First", "First");
+        u2.addRenameMe(r1);
+
+
+            userRole = new Role("user");
+
+            u1.addRole(userRole);
+            u2.addRole(userRole);
+
+            em.persist(userRole);
+
+            em.persist(u1);
+            em.persist(u2);
             em.persist(r1);
             em.getTransaction().commit();
         } finally {
@@ -93,36 +106,36 @@ class ProfileResourceTest {
 
     @Test
     public void testServerIsUp() {
-        given().when().get("/profile").then().statusCode(200);
+        given().when().get("/user").then().statusCode(200);
     }
 
     @Test
     void getAll() {
-        List<ProfileDTO> profileDTOS;
+        List<UserDTO> userDTOS;
 
-        profileDTOS = given()
+        userDTOS = given()
                 .contentType("application/json")
                 .when()
-                .get("/profile")
+                .get("/user")
                 .then()
                 .statusCode(HttpStatus.OK_200.getStatusCode())
-                .extract().body().jsonPath().getList("", ProfileDTO.class);
+                .extract().body().jsonPath().getList("", UserDTO.class);
 
 
-        assertEquals(profileDTOS.size(), 2);
+        assertEquals(userDTOS.size(), 2);
     }
 
     @Test
     void getById() {
         given()
                 .contentType("application/json")
-                .get("/profile/{id}", p1.getId())
+                .get("/user/{id}", u1.getId())
                 .then()
                 .assertThat()
                 .statusCode(HttpStatus.OK_200.getStatusCode())
-                .body("firstName", equalTo("Anna"))
-                .body("lastName", equalTo("Andersen"))
-                .body("email", equalTo("aa@mail.com"));
+                .body("firstName", equalTo(u1.getFirstName()))
+                .body("lastName", equalTo(u1.getLastName()))
+                .body("email", equalTo(u1.getEmail()));
     }
 
     @Test
@@ -133,48 +146,48 @@ class ProfileResourceTest {
 
         given()
                 .contentType("application/json")
-                .get("/profile/99999")
+                .get("/user/99999")
                 .then()
                 .assertThat()
                 .statusCode(HttpStatus.NOT_FOUND_404.getStatusCode())
-                .body("message", equalTo("The Profile entity with ID: 99999 Was not found"));
+                .body("message", equalTo("User with ID: 99999 was not found"));
     }
 
 
     @Test
     void create() {
-        p3 = new Profile("Charlie", "Cameron", "cc@mail.com");
-        String requestBody = GSON.toJson(new ProfileDTO(p3));
+        u3 = new User("Charlie", "test","Charlie", "Cameron", "cc@mail.com");
+        String requestBody = GSON.toJson(new UserDTO(u3));
 
         given()
                 .header("Content-type", ContentType.JSON)
                 .and()
                 .body(requestBody)
                 .when()
-                .post("/profile")
+                .post("/user")
                 .then()
                 .assertThat()
                 .statusCode(HttpStatus.OK_200.getStatusCode())
-                .body("firstName", equalTo("Charlie"))
-                .body("lastName", equalTo("Cameron"))
-                .body("email", equalTo("cc@mail.com"));
+                .body("firstName", equalTo(u3.getFirstName()))
+                .body("lastName", equalTo(u3.getLastName()))
+                .body("email", equalTo(u3.getEmail()));
     }
 
     @Test
     void update() {
-        ProfileDTO profileDTO = new ProfileDTO(p1);
-        profileDTO.setFirstName("Lone");
-        String requestBody = GSON.toJson(profileDTO);
+        UserDTO userDTO = new UserDTO(u1);
+        userDTO.setFirstName("Lone");
+        String requestBody = GSON.toJson(userDTO);
 
         given()
                 .header("Content-type", ContentType.JSON)
                 .body(requestBody)
                 .when()
-                .put("/profile/"+p1.getId())
+                .put("/user/"+u1.getId())
                 .then()
                 .assertThat()
                 .statusCode(200)
-                .body("id", equalTo(p1.getId()))
+                .body("id", equalTo(u1.getId()))
                 .body("firstName", equalTo("Lone"));
     }
 
@@ -182,24 +195,24 @@ class ProfileResourceTest {
     void delete() {
         given()
                 .header("Content-type", ContentType.JSON)
-                .pathParam("id", p1.getId())
-                .delete("/profile/{id}")
+                .pathParam("id", u1.getId())
+                .delete("/user/{id}")
                 .then()
                 .assertThat()
                 .statusCode(HttpStatus.OK_200.getStatusCode())
-                .body("id", equalTo(p1.getId()));
+                .body("id", equalTo(u1.getId()));
     }
 
     @Test
     void addRelation() {
         given()
                 .header("Content-type", ContentType.JSON)
-                .pathParam("id", p1.getId()).pathParam("entityid", r1.getId())
-                .put("/profile/add/{id}/{entityid}")
+                .pathParam("id", u1.getId()).pathParam("entityid", r1.getId())
+                .put("/user/add/{id}/{entityid}")
                 .then()
                 .assertThat()
                 .statusCode(HttpStatus.OK_200.getStatusCode())
-                .body("id", equalTo(p1.getId()))
+                .body("id", equalTo(u1.getId()))
                 .body("renameMeDTOS", hasItems(hasEntry("id",r1.getId())));
 
     }
@@ -208,12 +221,12 @@ class ProfileResourceTest {
     void removeRelation() {
         given()
                 .header("Content-type", ContentType.JSON)
-                .pathParam("id", p2.getId()).pathParam("entityid", r1.getId())
-                .delete("/profile/remove/{id}/{entityid}")
+                .pathParam("id", u2.getId()).pathParam("entityid", r1.getId())
+                .delete("/user/remove/{id}/{entityid}")
                 .then()
                 .assertThat()
                 .statusCode(HttpStatus.OK_200.getStatusCode())
-                .body("id", equalTo(p2.getId()))
+                .body("id", equalTo(u2.getId()))
                 .body("renameMeDTOS", empty());
     }
 
@@ -221,7 +234,7 @@ class ProfileResourceTest {
     public void getCount() throws Exception {
         given()
                 .contentType("application/json")
-                .get("/profile/count").then()
+                .get("/user/count").then()
                 .assertThat()
                 .statusCode(HttpStatus.OK_200.getStatusCode())
                 .body("count", equalTo(2));

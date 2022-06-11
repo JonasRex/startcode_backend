@@ -10,12 +10,17 @@ import org.mindrot.jbcrypt.BCrypt;
 
 @Entity
 @Table(name = "users")
+@NamedQuery(name = "User.deleteAllRows", query = "DELETE from User")
 public class User implements Serializable {
 
   private static final long serialVersionUID = 1L;
   @Id
-  @Basic(optional = false)
+  @Column(name = "id")
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private int id;
+
   @NotNull
+  @Size(min = 1, max = 25)
   @Column(name = "user_name", length = 25)
   private String userName;
 
@@ -25,21 +30,40 @@ public class User implements Serializable {
   @Column(name = "user_pass")
   private String userPass;
 
+  @Column(name = "first_name")
+  private String firstName;
+
+  @Column(name = "last_name")
+  private String lastName;
+
+  @Column(name = "email")
+  private String email;
+
+  @JoinTable(
+          name = "user_RENAMEME",
+          joinColumns = @JoinColumn(name = "user_id"),
+          inverseJoinColumns = @JoinColumn(name = "RENAMEME_id"))
+  @ManyToMany
+  private List<RenameMe> renameMesList = new ArrayList<>();
+
   @JoinTable(name = "user_roles", joinColumns = {
           @JoinColumn(name = "user_name", referencedColumnName = "user_name")}, inverseJoinColumns = {
           @JoinColumn(name = "role_name", referencedColumnName = "role_name")})
   @ManyToMany
   private List<Role> roleList = new ArrayList<>();
 
-  @OneToOne(cascade = CascadeType.ALL)
-  @JoinColumn(name = "profile_id", referencedColumnName = "id")
-  private Profile profile;
-
-
 
   public User(String userName, String userPass) {
     this.userName = userName;
     this.userPass = BCrypt.hashpw(userPass, BCrypt.gensalt());
+  }
+
+  public User(String userName, String userPass, String firstName, String lastName, String email) {
+    this.userName = userName;
+    this.userPass = BCrypt.hashpw(userPass, BCrypt.gensalt());
+    this.firstName = firstName;
+    this.lastName = lastName;
+    this.email = email;
   }
 
   public User(String userName) {
@@ -64,6 +88,13 @@ public class User implements Serializable {
     return(BCrypt.checkpw(pw, userPass));
   }
 
+  public int getId() {
+    return id;
+  }
+
+  public void setId(int id) {
+    this.id = id;
+  }
 
   public String getUserName() {
     return userName;
@@ -89,15 +120,52 @@ public class User implements Serializable {
     this.roleList = roleList;
   }
 
+  public String getFirstName() {
+    return firstName;
+  }
+
+  public void setFirstName(String firstName) {
+    this.firstName = firstName;
+  }
+
+  public String getLastName() {
+    return lastName;
+  }
+
+  public void setLastName(String lastName) {
+    this.lastName = lastName;
+  }
+
+  public String getEmail() {
+    return email;
+  }
+
+  public void setEmail(String email) {
+    this.email = email;
+  }
+
   public void addRole(Role userRole) {
     roleList.add(userRole);
   }
 
-  public Profile getProfile() {
-    return profile;
+  public List<RenameMe> getRenameMesList() {
+    return renameMesList;
   }
 
-  public void setProfile(Profile profile) {
-    this.profile = profile;
+  public void addRenameMe(RenameMe renameMe) {
+    this.renameMesList.add(renameMe);
+    if(!renameMe.getUserList().contains(this)){
+      renameMe.addUser(this);
+    }
+  }
+
+  public void setRenameMesList(List<RenameMe> renameMesList) {
+    this.renameMesList = renameMesList;
+  }
+
+  public void removeRenameMe(RenameMe renameMe) {
+    this.renameMesList.remove(renameMe);
+    //if(!renameMe.getUserList().contains(this))
+      renameMe.getUserList().remove(this);
   }
 }

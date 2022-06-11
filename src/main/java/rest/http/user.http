@@ -1,9 +1,9 @@
-GET http://localhost:8080/devops_starter_war_exploded/api/profile/1
+GET http://localhost:8080/devops_starter_war_exploded/api/user/1
 Content-Type: application/json
 
 
 ###
-PUT http://localhost:8080/devops_starter_war_exploded/api/profile/1
+PUT http://localhost:8080/devops_starter_war_exploded/api/user/1
 Content-Type: application/json
 
 {
@@ -24,10 +24,10 @@ Content-Type: application/json
 
 
 ###
-PUT http://localhost:8080/devops_starter_war_exploded/api/profile/addrenameme/1/2
+PUT http://localhost:8080/devops_starter_war_exploded/api/user/addrenameme/1/2
 Content-Type: application/json
 
 
 ###
-DELETE http://localhost:8080/devops_starter_war_exploded/api/profile/removerenameme/1/2
+DELETE http://localhost:8080/devops_starter_war_exploded/api/user/removerenameme/1/2
 Content-Type: application/json

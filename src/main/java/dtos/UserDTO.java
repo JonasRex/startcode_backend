@@ -1,6 +1,5 @@
 package dtos;
 
-import entities.Profile;
 import entities.RenameMe;
 import entities.User;
 
@@ -8,34 +7,36 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ProfileDTO {
+public class UserDTO {
     private int id;
+    private String userName;
     private String firstName;
     private String lastName;
     private String email;
     private List<RenameMeDTO> renameMeDTOS = new ArrayList<>(); // List of IDs.
 
 
-    public ProfileDTO(Profile profile) {
-        if (profile.getId() != 0)
-            this.id = profile.getId();
-        this.firstName = profile.getFirstName();
-        this.lastName = profile.getLastName();
-        this.email = profile.getEmail();
-        for (RenameMe renameMe : profile.getRenameMesList()) {
+    public UserDTO(User user) {
+        if (user.getId() != 0)
+            this.id = user.getId();
+        this.userName = user.getUserName();
+        this.firstName = user.getFirstName();
+        this.lastName = user.getLastName();
+        this.email = user.getEmail();
+        for (RenameMe renameMe : user.getRenameMesList()) {
             this.renameMeDTOS.add(new RenameMeDTO(renameMe));
         }
     }
 
 
-    public Profile getEntity() {
-        Profile p = new Profile(this.firstName, this.lastName, this.email);
-        this.renameMeDTOS.forEach(renameMeDTO -> p.addRenameMe(renameMeDTO.getEntity()));
-        return p;
+    public User getEntity() {
+        User u = new User(this.userName, null, this.firstName, this.lastName, this.email);
+        this.renameMeDTOS.forEach(renameMeDTO -> u.addRenameMe(renameMeDTO.getEntity()));
+        return u;
     }
 
-    public static List<ProfileDTO> toList(List<Profile> profiles) {
-        return profiles.stream().map(ProfileDTO::new).collect(Collectors.toList());
+    public static List<UserDTO> toList(List<User> users) {
+        return users.stream().map(UserDTO::new).collect(Collectors.toList());
     }
 
 
@@ -48,8 +49,12 @@ public class ProfileDTO {
         this.id = id;
     }
 
-    public String getFirstName() {
-        return firstName;
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
     public void setFirstName(String firstName) {

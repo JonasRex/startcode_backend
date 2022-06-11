@@ -1,7 +1,9 @@
 package facades;
 
-import entities.Profile;
+import entities.Role;
+import entities.User;
 import entities.RenameMe;
+import entities.User;
 import errorhandling.EntityNotFoundException;
 import org.junit.jupiter.api.*;
 import utils.EMF_Creator;
@@ -9,21 +11,20 @@ import utils.EMF_Creator;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
-
-
 import static org.junit.jupiter.api.Assertions.*;
 
 
-class ProfileFacadeTest {
+class UserFacadeTest {
     private static EntityManagerFactory emf;
-    private static IFacade<Profile> facade;
-    Profile p1,p2;
+    private static IFacade<User> facade;
+    User u1,u2;
+    Role userRole;
     RenameMe r1;
 
     @BeforeAll
     public static void setUpClass() {
         emf = EMF_Creator.createEntityManagerFactoryForTest();
-        facade = ProfileFacade.getFacade(emf);
+        facade = UserFacade.getFacade(emf);
 
 
     }
@@ -40,15 +41,24 @@ class ProfileFacadeTest {
         EntityManager em = emf.createEntityManager();
         try {
             em.getTransaction().begin();
-            em.createNamedQuery("Profile.deleteAllRows").executeUpdate();
+            em.createNamedQuery("User.deleteAllRows").executeUpdate();
             em.createNamedQuery("RenameMe.deleteAllRows").executeUpdate();
-            p1 = new Profile("Anna", "Andersen", "aa@mail.com");
-            p2 = new Profile("Bo", "Berthelsen", "bb@mail.com");
-            r1 = new RenameMe("First", "First");
-            p2.addRenameMe(r1);
+            em.createNamedQuery("Role.deleteAllRows").executeUpdate();
+            u1 = new User("AnnaAnna", "test","Anna", "Andersen", "aa@mail.com");
+            u2 = new User("BomberBo", "test","Bo", "Berthelsen", "bb@mail.com");
 
-            em.persist(p1);
-            em.persist(p2);
+            r1 = new RenameMe("First", "First");
+
+            u2.addRenameMe(r1);
+
+            userRole = new Role("user");
+
+            u1.addRole(userRole);
+            u2.addRole(userRole);
+
+            em.persist(userRole);
+            em.persist(u1);
+            em.persist(u2);
             em.persist(r1);
             em.getTransaction().commit();
         } finally {
@@ -59,15 +69,15 @@ class ProfileFacadeTest {
 
     @Test
     void create() {
-        Profile expected = new Profile("Henning", "Olsen", "ho@mail.com");
-        Profile actual   = facade.create(expected);
+        User expected = new User("Henning", "test","Henning", "Olsen", "ho@mail.com");
+        User actual   = facade.create(expected);
         assertEquals(expected, actual);
     }
 
     @Test
     void getById() throws EntityNotFoundException {
-        Profile expected = p1;
-        Profile actual = facade.getById(p1.getId());
+        User expected = u1;
+        User actual = facade.getById(u1.getId());
         assertEquals(expected.getId(), actual.getId());
     }
 
@@ -79,35 +89,35 @@ class ProfileFacadeTest {
 
     @Test
     void update() throws EntityNotFoundException {
-        p1.setFirstName("Lone");
-        Profile expected = p2;
-        Profile actual = facade.update(p2);
+        u2.setFirstName("Lone");
+        User expected = u2;
+        User actual = facade.update(u2);
         assertEquals(expected.getFirstName(),actual.getFirstName());
     }
 
     @Test
     void delete() throws EntityNotFoundException {
-        Profile p = facade.delete(p1.getId());
+        User p = facade.delete(u1.getId());
         int expected = 1;
         int actual = facade.getAll().size();
         assertEquals(expected, actual);
-        assertEquals(p.getId(),p1.getId());
+        assertEquals(p.getId(),u1.getId());
     }
 
     @Test
     void addRelation() throws EntityNotFoundException {
-        p1.addRenameMe(r1);
-        Profile p = facade.addRelation(p1.getId(), r1.getId());
-        assertEquals(1, p1.getRenameMesList().size());
-        assertEquals(p.getId(), p1.getId());
+        u1.addRenameMe(r1);
+        User p = facade.addRelation(u1.getId(), r1.getId());
+        assertEquals(1, u1.getRenameMesList().size());
+        assertEquals(p.getId(), u1.getId());
     }
 
     @Test
     void removeRelation() throws EntityNotFoundException {
-        p2.removeRenameMe(r1);
-        Profile p = facade.removeRelation(p2.getId(), r1.getId());
-        assertEquals(0, p2.getRenameMesList().size());
-        assertEquals(p.getId(), p2.getId());
+        u2.removeRenameMe(r1);
+        User p = facade.removeRelation(u2.getId(), r1.getId());
+        assertEquals(0, u2.getRenameMesList().size());
+        assertEquals(p.getId(), u2.getId());
     }
 
     @Test
