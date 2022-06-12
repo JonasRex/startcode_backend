@@ -1,6 +1,7 @@
 package dtos;
 
 import entities.RenameMe;
+import entities.Role;
 import entities.User;
 
 import java.util.ArrayList;
@@ -11,9 +12,11 @@ public class SignupDTO {
     private int id;
     private String userName;
     private String password;
+    private String password2;
     private String firstName;
     private String lastName;
     private String email;
+    private List<Role> roleList = new ArrayList<>();
     private List<RenameMeDTO> renameMeDTOS = new ArrayList<>(); // List of IDs.
 
 
@@ -22,9 +25,11 @@ public class SignupDTO {
             this.id = user.getId();
         this.userName = user.getUserName();
         this.password = user.getUserPass();
+        this.password2 = user.getUserPass();
         this.firstName = user.getFirstName();
         this.lastName = user.getLastName();
         this.email = user.getEmail();
+        this.roleList.addAll(user.getRoleList());
         for (RenameMe renameMe : user.getRenameMesList()) {
             this.renameMeDTOS.add(new RenameMeDTO(renameMe));
         }
@@ -33,14 +38,20 @@ public class SignupDTO {
 
     public User getEntity() {
         User u = new User(this.userName, password, this.firstName, this.lastName, this.email);
-        this.renameMeDTOS.forEach(renameMeDTO -> u.addRenameMe(renameMeDTO.getEntity()));
+        if (this.roleList != null)
+        this.roleList.forEach(u::addRole);
+
+        /*
+        if (this.renameMeDTOS.size() != 0)
+            this.renameMeDTOS.forEach(renameMeDTO -> u.addRenameMe(renameMeDTO.getEntity()));
+*/
+
         return u;
     }
 
     public static List<UserDTO> toList(List<User> users) {
         return users.stream().map(UserDTO::new).collect(Collectors.toList());
     }
-
 
 
     public int getId() {
@@ -65,6 +76,14 @@ public class SignupDTO {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getPassword2() {
+        return password2;
+    }
+
+    public void setPassword2(String password2) {
+        this.password2 = password2;
     }
 
     public String getFirstName() {
@@ -94,7 +113,6 @@ public class SignupDTO {
     public List<RenameMeDTO> getRenameMeDTOS() {
         return renameMeDTOS;
     }
-
 
 
 }
